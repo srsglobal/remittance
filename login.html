@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Foreign Remittance Service</title>
+
+    <!-- Bootstrap & Icons CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    
+    <link rel="stylesheet" href="assets/css/styles.css">
+
+    <!-- Firebase Configuration -->
+    <script type="module" src="assets/js/firebase-config.js"></script>
+</head>
+<body>
+
+    <!-- Login Section -->
+    <section class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="col-md-5 bg-dark text-light p-4 rounded">
+            <h3 class="text-center"><i class="bi bi-person-circle"></i> User Login</h3>
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="email" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </button>
+                <p class="text-danger text-center mt-2" id="errorMessage"></p>
+            </form>
+            <p class="text-center mt-3">
+                <a href="forgot-password.html" class="text-warning">Forgot Password?</a>
+            </p>
+            <p class="text-center mt-3">
+                Don't have an account? <a href="register.html" class="text-primary">Sign up here</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Firebase Authentication -->
+    <script type="module">
+        import { auth } from "./assets/js/firebase-config.js";
+        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+        document.getElementById("loginForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const errorMessage = document.getElementById("errorMessage");
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    alert("Login successful!");
+                    window.location.href = "index.html"; // Redirect to home page after login
+                })
+                .catch((error) => {
+                    errorMessage.innerText = error.message;
+                });
+        });
+    </script>
+
+</body>
+</html>

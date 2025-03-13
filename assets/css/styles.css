@@ -1,0 +1,258 @@
+/* General Styles */
+body {
+    background: linear-gradient(135deg, #1f1f3b, #4b0082);
+    font-family: Arial, sans-serif;
+    color: white;
+    margin: 0;
+    padding: 0;
+}
+
+/* Navigation Bar */
+.navbar {
+    padding: 15px;
+    font-size: 16px;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.navbar-nav .nav-item {
+    margin-left: 15px;
+}
+
+.navbar-nav .nav-link {
+    color: white !important;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #ffc107 !important;
+}
+
+/* Hero Section */
+.hero {
+    padding: 100px 0;
+    background: rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.hero p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.hero .btn-primary {
+    padding: 12px 20px;
+    font-size: 18px;
+}
+
+/* Exchange Rate Section */
+.exchange-rate {
+    padding: 20px 0;
+    text-align: center;
+    background: #222;
+}
+
+.exchange-rate h4 {
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+/* Quick Links Section */
+.quick-links {
+    padding: 50px 0;
+    text-align: center;
+}
+
+.quick-links .btn-outline-light {
+    padding: 12px 15px;
+    font-size: 16px;
+    display: inline-block;
+}
+
+/* Transaction Fee Calculator */
+.calculator {
+    padding: 50px 0;
+    text-align: center;
+}
+
+.calculator input {
+    font-size: 16px;
+    padding: 10px;
+    text-align: center;
+}
+
+/* Testimonials Section */
+.testimonials {
+    padding: 50px 0;
+    background: rgba(0, 0, 0, 0.7);
+    text-align: center;
+}
+
+.testimonials h4 {
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+/* How It Works Section */
+.how-it-works {
+    padding: 50px 0;
+    text-align: center;
+}
+
+.how-it-works .row div {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+/* Security & Compliance Section */
+.security {
+    padding: 50px 0;
+    background: rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+/* Contact Section */
+.contact {
+    padding: 50px 0;
+    background: rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.contact h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.contact p {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+/* Footer */
+.footer {
+    background: #111;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    font-size: 14px;
+}
+
+/* Buttons */
+.btn-outline-light {
+    margin: 10px;
+}
+
+.btn-primary {
+    background: #ff9800;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #e68a00;
+}
+
+/* Cards */
+.card {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.card h4 {
+    margin-bottom: 15px;
+}
+
+.card p {
+    font-size: 16px;
+}
+
+/* Table Styles */
+.table {
+    color: white;
+}
+
+.table-dark th,
+.table-dark td {
+    color: white;
+}
+
+/* Progress Indicator (For Multi-Step Forms) */
+.progress-indicator {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.progress-indicator span {
+    display: inline-block;
+    background: gray;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 5px;
+}
+
+.active-step-indicator {
+    background: blue !important;
+}
+
+/* Exchange Rate Section */
+.exchange-rate .card {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.exchange-rate .card:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+.exchange-rate h5 {
+    font-weight: bold;
+}
+
+.exchange-rate p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+    .exchange-rate .col-md-3 {
+        margin-bottom: 15px;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero {
+        padding: 60px 0;
+    }
+
+    .quick-links {
+        padding: 30px 0;
+    }
+
+    .testimonials,
+    .security,
+    .how-it-works {
+        padding: 30px 0;
+    }
+
+    .btn {
+        font-size: 14px;
+        padding: 10px;
+    }
+}

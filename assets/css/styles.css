@@ -228,6 +228,59 @@ body {
     margin-top: 10px;
 }
 
+/* Ensure Table is Responsive */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    min-width: 650px;
+}
+
+/* Center PDF Button */
+.download-pdf {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Improve Button Styles */
+.btn {
+    font-size: 14px;
+    padding: 8px 12px;
+}
+
+/* Mobile Navbar */
+.navbar-toggler {
+    border: none;
+    outline: none;
+}
+
+.navbar-nav {
+    text-align: center;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    h4 {
+        font-size: 18px;
+    }
+
+    .btn {
+        font-size: 12px;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    /* Navigation Menu */
+    .navbar-collapse {
+        text-align: center;
+    }
+}
+
 /* Responsive Layout */
 @media (max-width: 768px) {
     .exchange-rate .col-md-3 {

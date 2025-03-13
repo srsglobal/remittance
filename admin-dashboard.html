@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | ZenRemit</title>
+
+    <!-- Bootstrap & Icons CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    
+    <link rel="stylesheet" href="assets/css/styles.css">
+
+    <!-- Firebase Configuration -->
+    <script type="module" src="assets/js/firebase-config.js"></script>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="bi bi-shield-lock"></i> Admin Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="admin-dashboard.html"><i class="bi bi-house-door"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="admin-users.html"><i class="bi bi-people"></i> Users</a></li>
+                    <li class="nav-item"><a class="nav-link" href="admin-transactions.html"><i class="bi bi-currency-exchange"></i> Transactions</a></li>
+                    <li class="nav-item"><button class="btn btn-danger text-white px-3" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</button></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Overview -->
+    <section class="container py-5">
+        <h2 class="text-center"><i class="bi bi-speedometer2"></i> Admin Dashboard</h2>
+        <div class="row">
+            <!-- Total Transactions -->
+            <div class="col-md-4">
+                <div class="card bg-dark text-light p-4">
+                    <h5><i class="bi bi-clipboard-data"></i> Total Transactions</h5>
+                    <h3 id="totalTransactions">0</h3>
+                </div>
+            </div>
+
+            <!-- Completed Transactions -->
+            <div class="col-md-4">
+                <div class="card bg-dark text-light p-4">
+                    <h5><i class="bi bi-check-circle"></i> Completed Transactions</h5>
+                    <h3 id="completedTransactions">0</h3>
+                </div>
+            </div>
+
+            <!-- Pending Transactions -->
+            <div class="col-md-4">
+                <div class="card bg-dark text-light p-4">
+                    <h5><i class="bi bi-hourglass-split"></i> Pending Transactions</h5>
+                    <h3 id="pendingTransactions">0</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transactions Table -->
+    <section class="container py-5">
+        <h3 class="text-center"><i class="bi bi-list-check"></i> Transactions</h3>
+        <div class="table-responsive">
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Date</th>
+                        <th>Sender</th>
+                        <th>Receiver</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionsTable">
+                    <tr><td colspan="7" class="text-center">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Firebase Authentication & Database -->
+    <script type="module">
+        import { auth, db } from "./assets/js/firebase-config.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+        import { doc, getDoc, collection, query, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+        // Ensure user is an admin
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const adminRef = doc(db, "admins", user.uid);
+                const adminSnap = await getDoc(adminRef);
+
+                if (adminSnap.exists()) {
+                    // Load transactions
+                    fetchTransactions();
+                } else {
+                    alert("Access Denied! Only admins are allowed.");
+                    window.location.href = "admin-login.html";
+                }
+            } else {
+                window.location.href = "admin-login.html"; // Redirect to login if not authenticated
+            }
+        });
+
+        // Fetch all transactions
+        async function fetchTransactions() {
+            const transactionsTable = document.getElementById("transactionsTable");
+            transactionsTable.innerHTML = "<tr><td colspan='7' class='text-center'>Loading...</td></tr>";
+
+            let totalTransactions = 0;
+            let completedTransactions = 0;
+            let pendingTransactions = 0;
+
+            try {
+                const q = query(collection(db, "transactions"));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    transactionsTable.innerHTML = "";
+                    querySnapshot.forEach((doc) => {
+                        const transaction = doc.data();
+                        totalTransactions++;
+
+                        if (transaction.status === "Completed") completedTransactions++;
+                        if (transaction.status === "Pending") pendingTransactions++;
+
+                        transactionsTable.innerHTML += `
+                            <tr>
+                                <td>${doc.id}</td>
+                                <td>${new Date(transaction.timestamp.seconds * 1000).toLocaleDateString()}</td>
+                                <td>${transaction.senderName}</td>
+                                <td>${transaction.receiverName}</td>
+                                <td>LKR ${transaction.amount}</td>
+                                <td>
+                                    <span class="badge bg-${transaction.status === "Completed" ? "success" : "warning text-dark"}">${transaction.status}</span>
+                                </td>
+                                <td>
+                                    ${transaction.status !== "Completed" ? `
+                                    <button class="btn btn-sm btn-success" onclick="updateTransactionStatus('${doc.id}')">
+                                        <i class="bi bi-check2-circle"></i> Complete
+                                    </button>` : `<span class="text-muted">N/A</span>`}
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    // Update dashboard stats
+                    document.getElementById("totalTransactions").innerText = totalTransactions;
+                    document.getElementById("completedTransactions").innerText = completedTransactions;
+                    document.getElementById("pendingTransactions").innerText = pendingTransactions;
+                } else {
+                    transactionsTable.innerHTML = "<tr><td colspan='7' class='text-center'>No transactions found</td></tr>";
+                }
+            } catch (error) {
+                transactionsTable.innerHTML = `<tr><td colspan='7' class='text-center text-danger'>Error: ${error.message}</td></tr>`;
+            }
+        }
+
+        // Update Transaction Status
+        window.updateTransactionStatus = async function (transactionId) {
+            try {
+                const transactionRef = doc(db, "transactions", transactionId);
+                await updateDoc(transactionRef, { status: "Completed" });
+                alert("Transaction marked as Completed!");
+                fetchTransactions(); // Reload transactions
+            } catch (error) {
+                alert("Error updating transaction: " + error.message);
+            }
+        }
+
+        // Logout Function
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+            signOut(auth).then(() => {
+                window.location.href = "admin-login.html";
+            });
+        });
+    </script>
+
+</body>
+</html>

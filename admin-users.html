@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Users | ZenRemit</title>
+
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    
+    <link rel="stylesheet" href="assets/css/styles.css">
+
+    <!-- Firebase Configuration -->
+    <script type="module" src="assets/js/firebase-config.js"></script>
+    
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="bi bi-shield-lock"></i> Admin Users</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="admin-dashboard.html"><i class="bi bi-house-door"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="admin-users.html"><i class="bi bi-people"></i> Users</a></li>
+                    <li class="nav-item"><a class="nav-link" href="admin-transactions.html"><i class="bi bi-currency-exchange"></i> Transactions</a></li>
+                    <li class="nav-item"><button class="btn btn-danger text-white px-3" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</button></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Filters & Search -->
+    <section class="container py-4">
+        <h2 class="text-center"><i class="bi bi-funnel"></i> Filter Users</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <label for="searchInput" class="form-label">Search by User ID, Name, or Email</label>
+                <input type="text" id="searchInput" class="form-control" placeholder="Enter search term">
+            </div>
+            <div class="col-md-4">
+                <label for="dateFilter" class="form-label">Filter by Registration Date</label>
+                <input type="date" id="startDate" class="form-control mb-2">
+                <input type="date" id="endDate" class="form-control">
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <button class="btn btn-warning" id="resetButton"><i class="bi bi-x-circle"></i> Reset</button>
+            <button class="btn btn-success" id="downloadPDF"><i class="bi bi-file-earmark-pdf"></i> Download PDF</button>
+        </div>
+    </section>
+
+    <!-- Users Table -->
+    <section class="container py-4">
+        <h3 class="text-center"><i class="bi bi-list-check"></i> Users</h3>
+        <div class="table-responsive">
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Registration Date</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTable">
+                    <tr><td colspan="5" class="text-center">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Firebase Authentication & Database -->
+    <script type="module">
+        import { auth, db } from "./assets/js/firebase-config.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+        import { doc, getDoc, collection, query, getDocs } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+        let usersData = [];
+
+        // Ensure user is an admin
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const adminRef = doc(db, "admins", user.uid);
+                const adminSnap = await getDoc(adminRef);
+
+                if (adminSnap.exists()) {
+                    fetchUsers();
+                } else {
+                    alert("Access Denied! Only admins are allowed.");
+                    window.location.href = "admin-login.html";
+                }
+            } else {
+                window.location.href = "admin-login.html";
+            }
+        });
+
+        // Fetch all users
+        async function fetchUsers() {
+            const usersTable = document.getElementById("usersTable");
+            usersTable.innerHTML = "<tr><td colspan='5' class='text-center'>Loading...</td></tr>";
+
+            try {
+                const q = query(collection(db, "users"));
+                const querySnapshot = await getDocs(q);
+
+                usersData = [];
+                usersTable.innerHTML = "";
+
+                querySnapshot.forEach((doc) => {
+                    const user = { id: doc.id, ...doc.data() };
+                    usersData.push(user);
+                });
+
+                displayUsers(usersData);
+            } catch (error) {
+                usersTable.innerHTML = `<tr><td colspan='5' class='text-center text-danger'>Error: ${error.message}</td></tr>`;
+            }
+        }
+
+        // Display users
+        function displayUsers(data) {
+            const usersTable = document.getElementById("usersTable");
+            usersTable.innerHTML = "";
+
+            if (data.length === 0) {
+                usersTable.innerHTML = "<tr><td colspan='5' class='text-center'>No users found</td></tr>";
+                return;
+            }
+
+            data.forEach(user => {
+                usersTable.innerHTML += `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.fullName}</td>
+                        <td>${user.email}</td>
+                        <td>${user.phone || "N/A"}</td>
+                        <td>${new Date(user.createdAt.seconds * 1000).toLocaleDateString()}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Apply search & filters
+        function applyFilters() {
+            let searchTerm = document.getElementById("searchInput").value.trim().toLowerCase();
+            let startDate = document.getElementById("startDate").value;
+            let endDate = document.getElementById("endDate").value;
+
+            let filteredData = usersData.filter(user => {
+                let matchesSearch = !searchTerm || user.id.includes(searchTerm) || user.fullName.toLowerCase().includes(searchTerm) || user.email.toLowerCase().includes(searchTerm);
+                let matchesStartDate = !startDate || new Date(user.createdAt.seconds * 1000) >= new Date(startDate);
+                let matchesEndDate = !endDate || new Date(user.createdAt.seconds * 1000) <= new Date(endDate);
+                return matchesSearch && matchesStartDate && matchesEndDate;
+            });
+
+            displayUsers(filteredData);
+        }
+
+        // Reset Filters
+        document.getElementById("resetButton").addEventListener("click", () => {
+            document.getElementById("searchInput").value = "";
+            document.getElementById("startDate").value = "";
+            document.getElementById("endDate").value = "";
+            displayUsers(usersData);
+        });
+
+        // PDF Download
+        document.getElementById("downloadPDF").addEventListener("click", () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("User List", 14, 10);
+            doc.autoTable({ head: [["User ID", "Full Name", "Email", "Phone", "Registration Date"]], body: usersData.map(u => [u.id, u.fullName, u.email, u.phone || "N/A", new Date(u.createdAt.seconds * 1000).toLocaleDateString()]) });
+            doc.save("Users.pdf");
+        });
+    </script>
+
+</body>
+</html>

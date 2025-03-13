@@ -230,12 +230,12 @@ body {
 
 /* Ensure Table is Responsive */
 .table-responsive {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+overflow-x: auto;
+-webkit-overflow-scrolling: touch;
 }
 
 .table {
-    min-width: 650px;
+min-width: 650px;
 }
 
 /* Center PDF Button */
